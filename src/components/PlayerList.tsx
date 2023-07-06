@@ -1,7 +1,7 @@
 import React, {ReactElement, useEffect, useState} from "react";
 import {StyleSheet,  Text, View, FlatList, Alert, Image} from "react-native";
 import { Request } from "../request/requestFunctions";
-import FilterButton from "../FilterButton";
+import FilterButton from "./FilterButton";
 import {connect, useSelector} from "react-redux";
 import {RootState} from "../redux/redux";
 import PlayerItem from "./PlayerItem";

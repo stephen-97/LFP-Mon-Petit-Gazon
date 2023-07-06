@@ -1,4 +1,4 @@
-import React, {ReactElement , useState} from "react";
+import React, {ReactElement, useEffect, useState} from "react";
 import {StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 import {Picker} from  "@react-native-picker/picker"
 import {useNavigation} from "@react-navigation/native";
@@ -14,12 +14,6 @@ import {UltraPositionConfig} from "../interfaces/UltraPosition";
 
 const Filter = (): ReactElement => {
 
-
-    // State pour le poste du joueurs (récupérer dans le Picker)
-    const [selectedPost, setSelectedPost] = useState<any>("");
-    //State pou récupérer le nom du joueur (dans le TextInput)
-    const [playerName, setPlayerName] = useState<string>("");
-
     // Méthode pour dispatch l'objet dans le storage redux
     const dispatch: AppDispatch = useDispatch();
     // Object react Navigation pour naviguer entre les pages
@@ -28,12 +22,17 @@ const Filter = (): ReactElement => {
     const filter = useSelector((state: RootState) => state.filter)
 
 
+    // State pour le poste du joueurs (récupéré dans le Picker), on l'initalise grâce au state "filter" du storage redux où l'initialState vaut {name: "", ultraPosition: ""}
+    const [selectedPost, setSelectedPost] = useState<any>(filter.ultraPosition);
+    // State pou récupérer le nom du joueur (dans le TextInput),  on l'initalise grâce au state "filter" du storage redux où l'initialState vaut {name: "", ultraPosition: ""}
+    const [playerName, setPlayerName] = useState<string>(filter.name);
+
 
     return (
         <View style={styles.container}>
             <Text style={styles.closeButton} onPress={() => navigation.goBack()}>X</Text>
             <Text style={styles.title}>FILTRE</Text>
-            <TextInput style={styles.input} placeholder={"Nom du joueur"} onChangeText={text=> setPlayerName(text)}>{filter.name}</TextInput>
+            <TextInput style={styles.input} placeholder={"Nom du joueur"} onChangeText={text=> setPlayerName(text)}>{playerName}</TextInput>
             <Picker
                 selectedValue={selectedPost}
                 style={styles.selectListPost}
