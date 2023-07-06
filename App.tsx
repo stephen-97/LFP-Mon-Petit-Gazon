@@ -1,25 +1,21 @@
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
-import FilterButton from "./src/FilterButton";
-import PlayerList from "./src/components/PlayerList";
+import MainNavigator from "./src/navigation/MainNavigator";
+import { store} from "./src/redux/redux";
+import { Provider} from "react-redux";
 
 export default function App() {
   return (
-    <View style={styles.container}>
-        <FilterButton title={"Filtrer"} />
-        <PlayerList filter={"test"} />
-    </View>
+      <Provider store={store}>
+          <View style={styles.container}>
+              <MainNavigator />
+          </View>
+      </Provider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#red',
     marginVertical: 30,
   },
-  scrollView: {
-      paddingVertical: 50,
-      width: '100%',
-  }
 });

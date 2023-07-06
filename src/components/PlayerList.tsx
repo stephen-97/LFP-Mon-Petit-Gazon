@@ -1,25 +1,44 @@
 import React, {ReactElement, useEffect, useState} from "react";
-import {StyleSheet,  Text, View, FlatList, Alert} from "react-native";
+import {StyleSheet,  Text, View, FlatList, Alert, Image} from "react-native";
 import { Request } from "../request/requestFunctions";
-import propTypes from "prop-types";
+import FilterButton from "../FilterButton";
+import {connect, useSelector} from "react-redux";
+import {RootState} from "../redux/redux";
+import PlayerItem from "./PlayerItem";
 
+// COMPOSANT LISTE DES JOUEURS + BOUTON FILTRE
 
-type SmallBlockProps = {
-    filter: string,
-}
+const PlayerList = (): ReactElement => {
 
+    // state  |  liste des joueurs
+    const [dataPlayers, setDataPlayers] =  useState< Array<any>>([]);
+    //state | liste des clubs
+    const [dataClubs, setDataClubs] = useState<Array<any>>([]);
 
+    //state redux données filtre
+    const filter = useSelector((state: RootState) => state.filter)
 
-const PlayerList = (props: SmallBlockProps): ReactElement => {
+    //méthode pour filter liste des joueurs
+    const filteredData = (): Array<any> => {
+        let filteredData = dataPlayers;
+        if(filter.ultraPosition !==  ""){
+            filteredData = dataPlayers.filter(item => item.ultraPosition === filter.ultraPosition )
+        }
+        filteredData = filteredData.filter(item => (item.firstName + ' ' + item.lastName).includes(filter.name) );
+        return filteredData;
+    }
 
-    const [dataPlayers, setDataPlayers] =  useState([]);
-
+    /**
+     * Use Effect :
+     * Requete 1 : récupéère liste des joueurs
+     * Requête 2 : récupère liste des clubs
+     */
     useEffect(() => {
         Request('/api/data/championship-players-pool/1')
             .then(data => {
                 const poolPlayer = data.poolPlayers;
-                setDataPlayers(state => ({...state, ...data}))
-                //console.log(typeof Object.values(JSON.parse(data.poolPlayers)))
+                // On injecte l'object poolPlayers contenant tout les joueurs, au state
+                setDataPlayers(state => poolPlayer)
             })
             .catch((err) => {
                 setTimeout(() => {
@@ -27,59 +46,66 @@ const PlayerList = (props: SmallBlockProps): ReactElement => {
                 }, 500)
                 console.log(err);
             })
-    }, dataPlayers)
+        Request('/api/data/championship-clubs')
+            .then(data => {
+                //Contrairement à l'API "championship-players-pool", championship-club possède des "key" => "values" aux clubs, donc on fait cette manip
+                // Object.entries(data)[0][1] pour récupérer les objets
+                setDataClubs(state =>  Object.entries(data)[0][1])
+            })
+            .catch((err) => {
+                setTimeout(() => {
+                    Alert.alert("Erreur", "Pas de connexion au serveur")
+                }, 500)
+                console.log(err);
+            })
+    }, [])
 
-    const testData= [{id: "0", title: "test 1"}, {id: "2", title: "test 2"}, {id: "3", title: "test 3"}, {id: "4", title: "test 4"}, {id: "5", title: "test 5"}, {id: "5", title: "test 5"}, {id: "5", title: "test 5"}, {id: "5", title: "test 5"}, {id: "5", title: "test 5"}, {id: "5", title: "test 5"}, {id: "5", title: "test 5"}, ]
 
-
+    /**
+     * Dans le render, nous avons une condition "dataPlayers.length > 0 && Object.keys(dataClubs).length > 0 &&" car il faut
+     * attendre l'initialisation des states dans le useEffect (représentant la liste des clubs et des joueurs), avant d'appeller la flatlist.
+     */
     return (
-         <FlatList
-             style={{ flex: 1}}
-             data={testData}
-             keyExtractor={(item: any, index: number) => {
-                 return index.toString()
-             }}
-             showsHorizontalScrollIndicator={false}
-             initialNumToRender={1}
-             renderItem={({item: any, index: number}) => (
-                 <View style={styles.content}>
-                     <Text>HEY</Text>
-                 </View>
-             )}
-         />
+        <>
+            <View style={styles.filterButtonContainer}>
+                <FilterButton title={"Filtre"} />
+            </View>
+            {dataPlayers.length > 0 && Object.keys(dataClubs).length > 0 &&
+                <FlatList
+                    style={{ flex: 1}}
+                    data={filteredData()}
+                    keyExtractor={(item: any, index: number) => {
+                        return index.toString()
+                    }}
+                    showsHorizontalScrollIndicator={false}
+                    initialNumToRender={30}
+                    renderItem={({item , index: number}) => (
+                        <PlayerItem
+                            playerItem={item}
+                            clubJersey={dataClubs[item.clubId].defaultJerseyUrl}
+                            clubShortName={dataClubs[item.clubId].shortName}
+                        />
+                    )}
+                />
+            }
+        </>
     );
 };
 
-
-export default PlayerList
-
-
+// STYLE
 const styles = StyleSheet.create({
-    content: {
+    filterButtonContainer: {
+        shadowColor: '#000',
+        width: '100%',
         height: 100,
-        backgroundColor: '#cffff8',
-        margin: 20,
-        borderRadius: 20,
+        shadowOffset: {width: 3, height: 1},
+        shadowOpacity: 0.4,
     },
-    viewTitle: {
-        height: 50,
-        backgroundColor: '#494949',
-    },
-    title:{
-        marginLeft: 20,
-        fontSize: 22,
-        fontWeight: "bold",
-        color: "black",
-        marginBottom: 10,
-    },
-    image:{
-        height: 210,
-        width: 180,
-    },
-    mangaTitle: {
-        color: 'white',
-        fontSize: 18,
-        textAlign: 'center',
-        marginTop: 5,
-    }
 });
+
+const mapStateToProps = (state: RootState) => {
+    return {page: state.filter}
+}
+
+export default connect(mapStateToProps)(PlayerList)
+

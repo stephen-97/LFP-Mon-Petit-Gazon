@@ -1,15 +1,21 @@
 import React, {ReactElement, useEffect, useState} from "react";
 import {TouchableOpacity, Text, StyleSheet} from "react-native";
+import {useNavigation} from "@react-navigation/native";
+
+
 
 type SmallBlockProps = {
     title: string,
 }
 
 const FilterButton = (props: SmallBlockProps) : ReactElement => {
+
+    const navigation = useNavigation();
+
     return(
         <TouchableOpacity
             style={styles.button}
-            onPress={() => null}
+            onPress={() => navigation.navigate("Filter" as never)}
         >
             <Text style={styles.title}>{props.title}</Text>
         </TouchableOpacity>
@@ -21,6 +27,7 @@ const styles = StyleSheet.create({
     button: {
         marginVertical: 10,
         alignItems: "center",
+        alignSelf: "center",
         backgroundColor: '#76d4bc',
         borderRadius: 10,
         paddingHorizontal: 20,
