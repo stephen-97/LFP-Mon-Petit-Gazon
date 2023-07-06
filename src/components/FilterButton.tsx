@@ -3,11 +3,12 @@ import {TouchableOpacity, Text, StyleSheet} from "react-native";
 import {useNavigation} from "@react-navigation/native";
 
 
-
+// Typing des props
 type SmallBlockProps = {
     title: string,
 }
 
+// COMPOSANT BOUTON APPELANT LE FILTRE (MODAL SCREEN)
 const FilterButton = (props: SmallBlockProps) : ReactElement => {
 
     const navigation = useNavigation();
