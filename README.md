@@ -5,7 +5,7 @@
 ## Dans le dossier ./SRC
 
 ### components
-Liste des composants principaux,exemple :Bouton, Screen, cham...
+Liste des composants principaux, par exemple :Bouton, Screen, champ de texte...
 ### constant
 Liste des constantes : colors, height
 ### interfaces
